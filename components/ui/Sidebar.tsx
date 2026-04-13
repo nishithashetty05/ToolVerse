@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, LogOut, Settings, Tractor, User, Wrench } from "lucide-react";
+import { SignOutButton } from "@clerk/nextjs";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,11 +36,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
       {/* Sidebar Content */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#0f172a] border-r border-gray-200 dark:border-gray-800 flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card-bg border-r border-card-border flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="h-16 flex items-center px-6 border-b border-card-border">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               <Tractor className="h-5 w-5" />
@@ -64,7 +65,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                   isStrictlyActive
                     ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-green-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-card-muted hover:text-gray-900 dark:hover:text-gray-200"
                 }`}
               >
                 <item.icon className={`h-5 w-5 ${isStrictlyActive ? "text-primary" : ""}`} />
@@ -74,14 +75,13 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-          <Link
-            href="/auth"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            Logout
-          </Link>
+        <div className="p-4 border-t border-card-border">
+          <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+              <LogOut className="h-5 w-5" />
+              Logout
+            </button>
+          </SignOutButton>
         </div>
       </aside>
     </>

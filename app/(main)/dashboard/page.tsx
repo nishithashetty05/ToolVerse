@@ -80,7 +80,7 @@ export default function DashboardPage() {
           { label: "Reservations", value: "18", icon: Users, color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400" },
           { label: "Alerts", value: "3", icon: ShieldAlert, color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white dark:bg-[#1e293b] p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div key={idx} className="bg-card-bg p-6 rounded-2xl border border-card-border shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow">
             <div className={`p-4 rounded-xl ${stat.color}`}>
               <stat.icon className="h-6 w-6" />
             </div>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
+      <div className="border-b border-card-border">
         <nav className="-mb-px flex space-x-8 overflow-x-auto pb-1 no-scrollbar">
           {tabs.map((tab) => (
             <Link
@@ -119,7 +119,7 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center flex-wrap gap-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Available for Rent</h2>
               <div className="flex gap-2">
-                <button className="px-4 py-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors hidden sm:block">
+                <button className="px-4 py-2 bg-card-bg border border-card-border rounded-lg text-sm font-medium hover:bg-card-muted transition-colors hidden sm:block">
                   Filter
                 </button>
                 <div className="relative">
@@ -127,7 +127,7 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     placeholder="Search tools..."
-                    className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-[#1e293b] outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-full sm:w-auto"
+                    className="pl-9 pr-4 py-2 border border-card-border rounded-lg text-sm bg-card-bg outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-full sm:w-auto"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
         )}
 
         {["activity", "maintenance", "experts"].includes(currentTab) && (
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-12 text-center">
+          <div className="bg-card-muted border border-card-border rounded-2xl p-12 text-center">
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">Coming Soon</h3>
             <p className="text-gray-500">The {tabs.find(t => t.id === currentTab)?.label} feature is currently under development.</p>

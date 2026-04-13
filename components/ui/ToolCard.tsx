@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Clock, MapPin, Star } from "lucide-react";
+import { Clock, MapPin, Star, User } from "lucide-react";
 
 export type ToolStatus = "available" | "borrowed" | "reserved";
 
@@ -25,9 +25,9 @@ export default function ToolCard({ tool }: { tool: ToolProps }) {
   const currentStatus = statusConfig[tool.status];
 
   return (
-    <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-lg transition-all duration-300 group hover:-translate-y-1">
+    <div className="bg-card-bg rounded-2xl border border-card-border overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
       {/* Image Area */}
-      <div className="relative h-48 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+      <div className="relative h-48 w-full bg-card-muted overflow-hidden">
         {/* We would use next/image in real app, but for generic styling we use a div with background or placeholder */}
         <div 
           className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
@@ -58,7 +58,7 @@ export default function ToolCard({ tool }: { tool: ToolProps }) {
             <p className="text-xs font-medium text-primary mb-1 uppercase tracking-wider">{tool.category}</p>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1">{tool.name}</h3>
           </div>
-          <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-1 bg-card-muted px-2 py-1 rounded-md">
             <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
             <span className="text-xs font-semibold">{tool.rating}</span>
           </div>
@@ -69,8 +69,8 @@ export default function ToolCard({ tool }: { tool: ToolProps }) {
             <MapPin className="h-4 w-4 text-gray-400" />
             <span className="line-clamp-1">{tool.location}</span>
           </div>
-          <div className="flex text-xs items-center gap-2 border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
-             <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+          <div className="flex text-xs items-center gap-2 border-t border-card-border pt-3 mt-3">
+             <div className="h-6 w-6 rounded-full bg-card-muted flex items-center justify-center flex-shrink-0">
                <User className="h-3 w-3 text-gray-500" />
              </div>
              <div>

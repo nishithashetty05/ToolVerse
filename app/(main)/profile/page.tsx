@@ -8,7 +8,7 @@ export default function ProfilePage() {
         <p className="text-gray-500 dark:text-gray-400">View and update your personal information.</p>
       </div>
 
-      <div className="bg-white dark:bg-[#1e293b] rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="bg-card-bg rounded-3xl border border-card-border shadow-sm overflow-hidden">
         {/* Profile Header */}
         <div className="h-32 bg-primary relative">
           <div className="absolute inset-0 bg-[url('/hero-bg.png')] bg-cover bg-center mix-blend-overlay opacity-20"></div>
@@ -17,15 +17,15 @@ export default function ProfilePage() {
         <div className="px-8 pb-8">
           <div className="relative flex justify-between items-end -mt-12 mb-8">
             <div className="relative group">
-              <div className="h-24 w-24 rounded-full border-4 border-white dark:border-[#1e293b] bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+              <div className="h-24 w-24 rounded-full border-4 border-white dark:border-card-bg bg-card-muted flex items-center justify-center overflow-hidden">
                 <UserIcon className="h-12 w-12 text-gray-400" />
               </div>
-              <button className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm text-gray-600 hover:text-primary transition-colors">
+              <button className="absolute bottom-0 right-0 bg-card-bg p-1.5 rounded-full border border-card-border shadow-sm text-gray-600 hover:text-primary transition-colors">
                 <Camera className="h-4 w-4" />
               </button>
             </div>
             <div className="flex gap-3">
-              <button className="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <button className="px-4 py-2 rounded-xl text-sm font-medium bg-card-muted text-gray-700 dark:text-gray-200 hover:bg-card-border transition-colors">
                 Cancel
               </button>
               <button className="px-4 py-2 rounded-xl text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
@@ -45,7 +45,7 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     defaultValue="Student User"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                    className="block w-full pl-10 pr-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
                   />
                 </div>
               </div>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
                     type="email"
                     defaultValue="student@example.com"
                     disabled
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 transition-all outline-none cursor-not-allowed"
+                    className="block w-full pl-10 pr-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-500 dark:text-gray-400 transition-all outline-none cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -74,7 +74,7 @@ export default function ProfilePage() {
                   <input
                     type="tel"
                     defaultValue="+91 98765 43210"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                    className="block w-full pl-10 pr-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
                   />
                 </div>
               </div>
@@ -88,7 +88,7 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     defaultValue="Village Hub, North District"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                    className="block w-full pl-10 pr-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
                   />
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function ProfilePage() {
               <textarea
                 rows={4}
                 defaultValue="I own a small organic farm in the North District. I usually need heavy machinery during harvest seasons and I'm happy to rent out my water pumps and seed drills when not in use."
-                className="block w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none resize-none"
+                className="block w-full p-3 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none resize-none"
               />
             </div>
           </form>
