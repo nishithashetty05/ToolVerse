@@ -32,9 +32,14 @@ function createPool(): Pool {
     max: 10,               // Maximum simultaneous connections in the pool
     idleTimeoutMillis: 30_000,   // Close idle connections after 30s
     connectionTimeoutMillis: 5_000, // Fail fast if DB is unreachable
-    ssl: process.env.NODE_ENV === 'production'
-      ? { rejectUnauthorized: false } // Required for hosted DBs (e.g. Supabase, Railway)
-      : false,
+    // Neon (and most cloud Postgres providers) require SSL.
+    // rejectUnauthorized: false accepts Neon's CA-signed cert without
+    // needing to bundle the root certificate locally.
+    ssl: process.env.DATABASE_URL?.includes('neon.tech')
+      ? { rejectUnauthorized: false }          // Neon cloud — SSL required
+      : process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }        // Other hosted DBs in production
+        : false,                               // Local Postgres — no SSL needed
   });
 }
 
