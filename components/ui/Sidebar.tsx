@@ -53,7 +53,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
-              const isStrictlyActive = pathname === item.href.split('?')[0];
+            const isActive = pathname === item.href || (pathname === "/dashboard" && item.href.includes("?tab") && false); // Simplified active state for tabs would rely on searchParams but pathname is fine for base.
+            // A more robust check for base paths
+            const isStrictlyActive = pathname === item.href.split('?')[0];
 
             return (
               <Link

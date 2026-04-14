@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AlertCircle, Clock, Plus, Search, ShieldAlert, Tractor, Users } from "lucide-react";
 import ToolCard, { ToolProps } from "@/components/ui/ToolCard";
 
+<<<<<<< HEAD
 interface ApiTool {
   id: number;
   name: string;
@@ -37,6 +38,64 @@ function toToolProps(t: ApiTool): ToolProps {
     imageUrl: t.imageUrl ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",
   };
 }
+=======
+const MOCK_TOOLS: ToolProps[] = [
+  {
+    id: "1",
+    name: "John Deere 5050 D Tractor",
+    category: "Tractors",
+    status: "available",
+    location: "Farm A, North District",
+    owner: "Ramesh Singh",
+    rating: 4.8,
+    pricePerDay: 1500,
+    addedDate: "2025-01-15",
+    condition: "Excellent",
+    imageUrl: "https://images.unsplash.com/photo-1592982537447-6f23f6d7eb59?auto=format&fit=crop&q=80&w=600",
+  },
+  {
+    id: "2",
+    name: "Heavy Duty Rotavator",
+    category: "Implements",
+    status: "borrowed",
+    location: "Farm B, East District",
+    owner: "Amit Kumar",
+    rating: 4.5,
+    pricePerDay: 500,
+    addedDate: "2025-02-20",
+    condition: "Good",
+    dueDate: "2026-04-15",
+    borrower: "Carlos Rivera",
+    imageUrl: "https://images.unsplash.com/photo-1586524245648-52c6f3795ab6?auto=format&fit=crop&q=80&w=600",
+  },
+  {
+    id: "3",
+    name: "Honda Water Pump 5HP",
+    category: "Irrigation",
+    status: "reserved",
+    location: "Village Hub",
+    owner: "Suresh Patel",
+    rating: 4.9,
+    pricePerDay: 300,
+    addedDate: "2025-03-10",
+    condition: "Fair",
+    imageUrl: "https://images.unsplash.com/photo-1563820227187-25e4fba6ea81?auto=format&fit=crop&q=80&w=600",
+  },
+  {
+    id: "4",
+    name: "Automatic Seed Drill",
+    category: "Seeding",
+    status: "available",
+    location: "Farm C, West District",
+    owner: "Vikram Sharma",
+    rating: 4.2,
+    pricePerDay: 800,
+    addedDate: "2025-03-15",
+    condition: "Excellent",
+    imageUrl: "https://images.unsplash.com/photo-1625244724120-1fd1d34d00f6?auto=format&fit=crop&q=80&w=600",
+  },
+];
+>>>>>>> 581fd655550528962547e1a05b6dc7ca8dd219b4
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
@@ -150,6 +209,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
+<<<<<<< HEAD
       {/* Tabs */}
       <div className="border-b border-card-border">
         <nav className="-mb-px flex space-x-8 overflow-x-auto pb-1 no-scrollbar">
@@ -170,6 +230,8 @@ export default function DashboardPage() {
         </nav>
       </div>
 
+=======
+>>>>>>> 581fd655550528962547e1a05b6dc7ca8dd219b4
       {/* Tab Content */}
       <div className="pt-2">
 
