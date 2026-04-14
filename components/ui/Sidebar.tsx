@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Settings, Tractor, User, Wrench } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { LayoutDashboard, LogOut, ShieldAlert, Tractor, User, Users, Wrench } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 
 interface SidebarProps {
@@ -12,14 +12,17 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab");
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "My Tools", href: "/dashboard?tab=my-tools", icon: Tractor },
     { name: "Activity", href: "/dashboard?tab=activity", icon: Wrench },
+    { name: "Maintenance", href: "/dashboard?tab=maintenance", icon: ShieldAlert },
+    { name: "Experts", href: "/dashboard?tab=experts", icon: Users },
     { name: "Profile", href: "/profile", icon: User },
     // Removed Admin panel per user request
-    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   const closeSidebar = () => setIsOpen(false);
@@ -53,9 +56,11 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || (pathname === "/dashboard" && item.href.includes("?tab") && false); // Simplified active state for tabs would rely on searchParams but pathname is fine for base.
-            // A more robust check for base paths
-            const isStrictlyActive = pathname === item.href.split('?')[0];
+            const itemPath = item.href.split('?')[0];
+            const itemParams = new URLSearchParams(item.href.split('?')[1] || "");
+            const itemTab = itemParams.get("tab");
+            
+            const isStrictlyActive = pathname === itemPath && (itemTab === currentTab || (!itemTab && !currentTab));
 
             return (
               <Link

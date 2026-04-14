@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
-import { Clock, MapPin, Star, User } from "lucide-react";
+import { useState } from "react";
+import { Calendar, ChevronDown, Clock, MapPin, Star, User, X } from "lucide-react";
 
 export type ToolStatus = "available" | "borrowed" | "reserved";
 
@@ -13,9 +16,15 @@ export interface ToolProps {
   rating: number;
   imageUrl: string;
   pricePerDay: number;
+  addedDate?: string;
+  condition?: string;
+  dueDate?: string;
+  borrower?: string;
 }
 
 export default function ToolCard({ tool }: { tool: ToolProps }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const statusConfig = {
     available: { color: "bg-available text-green-800 dark:text-green-100", dot: "bg-green-500", label: "Available" },
     borrowed: { color: "bg-borrowed text-red-800 dark:text-red-100", dot: "bg-red-500", label: "Borrowed" },
@@ -79,6 +88,63 @@ export default function ToolCard({ tool }: { tool: ToolProps }) {
              </div>
           </div>
         </div>
+
+        {/* Expanded Extra Details Before Action Buttons (e.g. Due Date) */}
+        {isExpanded && tool.status === 'borrowed' && (
+          <div className="mt-4 bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 text-sm font-medium py-2 px-3 rounded-lg flex items-center gap-2">
+            <Calendar className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">
+              Due: {tool.dueDate || "N/A"} · Borrowed by {tool.borrower || "Unknown"}
+            </span>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className={`mt-4 pt-4 border-t border-card-border flex gap-2 ${isExpanded && tool.status === 'borrowed' ? 'border-t-0 pt-0' : ''}`}>
+          {tool.status === 'available' ? (
+            <>
+              <button className="flex-1 bg-green-700 hover:bg-green-800 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                Borrow Now
+              </button>
+              <button className="flex-1 bg-white hover:bg-gray-50 text-green-700 border border-green-700 text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                Reserve
+              </button>
+            </>
+          ) : (
+            <button className="flex-1 bg-green-700 hover:bg-green-800 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-sm">
+              Join Waitlist
+            </button>
+          )}
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="bg-white hover:bg-gray-50 text-gray-500 border border-gray-300 p-2 rounded-lg transition-colors shadow-sm flex items-center justify-center">
+            {isExpanded ? <X className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+        </div>
+
+        {/* Expanded Details Table */}
+        {isExpanded && (
+          <div className="mt-4 pt-4 border-t border-card-border/50 space-y-3 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 dark:text-gray-400">Added Date</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{tool.addedDate || "2025-01-01"}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 dark:text-gray-400">Daily Rate</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">₹{tool.pricePerDay}/day</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 dark:text-gray-400">Condition</span>
+              <span className={`font-medium ${
+                tool.condition?.toLowerCase() === 'excellent' ? 'text-green-600' : 
+                tool.condition?.toLowerCase() === 'good' ? 'text-blue-600' : 
+                'text-yellow-600'
+              }`}>
+                {tool.condition || "Good"}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
