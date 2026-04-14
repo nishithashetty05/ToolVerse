@@ -2,7 +2,7 @@
 
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowLeft, Calendar, ShieldCheck, Tractor, Users, Wrench } from "lucide-react";
+import { ArrowLeft, Calendar, Tractor, Users, Wrench } from "lucide-react";
 
 export default function SignUpPage() {
   return (

@@ -1,4 +1,4 @@
-import Link from "next/link";
+
 import { Bell, Menu, Search } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
@@ -34,7 +34,7 @@ export default function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
         </button>
 
         <div className="flex items-center">
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
         </div>
       </div>
     </header>

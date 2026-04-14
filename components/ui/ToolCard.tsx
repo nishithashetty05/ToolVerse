@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { Clock, MapPin, Star, User } from "lucide-react";
+import { MapPin, Star, User } from "lucide-react";
 
 export type ToolStatus = "available" | "borrowed" | "reserved";
 
