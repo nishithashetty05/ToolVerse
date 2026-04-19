@@ -14,6 +14,7 @@ import BookingModal  from "@/components/ui/BookingModal";
 import EditToolModal from "@/components/ui/EditToolModal";
 import ExpertCard    from "@/components/ui/ExpertCard";
 import ReviewModal   from "@/components/ui/ReviewModal";
+import ImageUploadInput from "@/components/ui/ImageUploadInput";
 import type { ExpertResponse } from "@/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -745,7 +746,11 @@ function EmptyState({ icon, title, message }: { icon: React.ReactNode; title: st
 
 // ── Add Tool Form ───────────────────────────────────────────────────────────────
 function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
-  const [form, setForm] = useState({ name:"", location:"", pricePerDay:"", description:"", condition:"good", categoryId:"1", imageUrl:"" });
+  const [form, setForm] = useState({
+    name: "", location: "", pricePerDay: "",
+    description: "", condition: "good", categoryId: "1",
+    imageUrl: "",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
 
@@ -776,40 +781,63 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">List a New Tool</h3>
       {err && <p className="text-sm text-red-500 mb-3">{err}</p>}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* Image upload ─ spans both columns */}
+        <div className="md:col-span-2">
+          <ImageUploadInput
+            value={form.imageUrl}
+            onChange={(url) => setForm({ ...form, imageUrl: url })}
+            label="Tool Image"
+          />
+        </div>
+
+        {/* Text fields */}
         {[
-          { label:"Tool Name *",     key:"name",        type:"text",   placeholder:"e.g. John Deere Tractor" },
-          { label:"Location *",      key:"location",    type:"text",   placeholder:"e.g. North District" },
-          { label:"Price/Day (₹) *", key:"pricePerDay", type:"number", placeholder:"500" },
-          { label:"Image URL",       key:"imageUrl",    type:"text",   placeholder:"https://..." },
+          { label: "Tool Name *",     key: "name",        type: "text",   placeholder: "e.g. John Deere Tractor" },
+          { label: "Location *",      key: "location",    type: "text",   placeholder: "e.g. North District" },
+          { label: "Price/Day (₹) *", key: "pricePerDay", type: "number", placeholder: "500" },
         ].map(({ label, key, type, placeholder }) => (
           <div key={key}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-            <input required={label.includes("*")} type={type} min={type === "number" ? "1" : undefined}
+            <input
+              required={label.includes("*")}
+              type={type}
+              min={type === "number" ? "1" : undefined}
               value={form[key as keyof typeof form]}
               onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               placeholder={placeholder}
-              className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+              className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
         ))}
 
+        {/* Selects */}
         {[
-          { label:"Category", key:"categoryId", options:[["1","Tractors"],["2","Implements"],["3","Irrigation"],["4","Seeding"],["5","Harvesting"],["6","Spraying"],["7","Storage"]] },
-          { label:"Condition", key:"condition",  options:[["excellent","Excellent"],["good","Good"],["fair","Fair"],["poor","Poor"]] },
+          { label: "Category", key: "categoryId", options: [["1","Tractors"],["2","Implements"],["3","Irrigation"],["4","Seeding"],["5","Harvesting"],["6","Spraying"],["7","Storage"]] },
+          { label: "Condition", key: "condition",  options: [["excellent","Excellent"],["good","Good"],["fair","Fair"],["poor","Poor"]] },
         ].map(({ label, key, options }) => (
           <div key={key}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-            <select value={form[key as keyof typeof form]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-              className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary">
+            <select
+              value={form[key as keyof typeof form]}
+              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary"
+            >
               {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
         ))}
 
+        {/* Description ─ full width */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-          <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+          <textarea
+            rows={2}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Brief description..."
-            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary resize-none" />
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary resize-none"
+          />
         </div>
 
         <div className="md:col-span-2 flex gap-3 justify-end">
