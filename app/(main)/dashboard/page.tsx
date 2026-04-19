@@ -6,12 +6,14 @@ import Link from "next/link";
 import {
   AlertCircle, CalendarDays, CheckCircle2, Clock,
   Plus, Search, ShieldAlert, Tractor, Users,
-  Wrench, UserCheck, Filter,
+  Wrench, UserCheck, Filter, Star,
+  CheckCheck, XCircle, Truck, RotateCcw,
 } from "lucide-react";
 import ToolCard, { ToolProps } from "@/components/ui/ToolCard";
 import BookingModal  from "@/components/ui/BookingModal";
 import EditToolModal from "@/components/ui/EditToolModal";
 import ExpertCard    from "@/components/ui/ExpertCard";
+import ReviewModal   from "@/components/ui/ReviewModal";
 import type { ExpertResponse } from "@/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -72,6 +74,10 @@ export default function DashboardPage() {
   const [bookings,        setBookings]       = useState<ApiBooking[]>([]);
   const [bookingsRole,    setBookingsRole]   = useState<"borrower" | "owner">("borrower");
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [actionLoading,   setActionLoading]  = useState<number | null>(null);
+
+  // ── Review Modal ──
+  const [reviewBooking, setReviewBooking] = useState<{ id: number; toolName: string } | null>(null);
 
   // ── Maintenance tab state ──
   const [maintTools,   setMaintTools]   = useState<ToolProps[]>([]);
@@ -201,11 +207,30 @@ export default function DashboardPage() {
     } catch { alert("Failed to delete tool"); }
   };
 
+  // ── Update Booking Status ───────────────────────────────────────────────────
+  const updateBookingStatus = async (bookingId: number, status: string) => {
+    setActionLoading(bookingId);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.error ?? "Action failed");
+        return;
+      }
+      fetchBookings(bookingsRole);
+    } catch { alert("Action failed"); }
+    finally { setActionLoading(null); }
+  };
+
   // ── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (currentTab === "tools")       fetchTools();
     if (currentTab === "my-tools")    fetchMyTools();
-    if (currentTab === "activity")    fetchBookings(bookingsRole);
+    if (currentTab === "activity")  { fetchBookings(bookingsRole); fetchMyTools(); }
     if (currentTab === "maintenance") fetchMaintTools();
     if (currentTab === "experts")     fetchExperts();
   }, [currentTab]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -240,6 +265,16 @@ export default function DashboardPage() {
           tool={editingTool}
           onClose={() => setEditingTool(null)}
           onSuccess={() => { fetchMyTools(); setEditingTool(null); }}
+        />
+      )}
+
+      {/* Review Modal */}
+      {reviewBooking && (
+        <ReviewModal
+          bookingId={reviewBooking.id}
+          toolName={reviewBooking.toolName}
+          onClose={() => setReviewBooking(null)}
+          onSuccess={() => { fetchBookings(bookingsRole); setReviewBooking(null); }}
         />
       )}
 
@@ -423,32 +458,123 @@ export default function DashboardPage() {
 
               {!bookingsLoading && bookings.length > 0 && (
                 <div className="space-y-3">
-                  {bookings.map((b) => (
-                    <div key={b.id} className="bg-card-bg rounded-2xl border border-card-border p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-                      <div
-                        className="h-16 w-16 rounded-xl bg-card-muted flex-shrink-0 bg-cover bg-center"
-                        style={{ backgroundImage: b.tool_image_url ? `url(${b.tool_image_url})` : undefined }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">{b.tool_name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{b.tool_location}</p>
-                        <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <CalendarDays className="h-3 w-3" />
-                            {new Date(b.start_date).toLocaleDateString("en-IN")} →{" "}
-                            {new Date(b.end_date).toLocaleDateString("en-IN")}
+                  {bookings.map((b) => {
+                    const isActing = actionLoading === b.id;
+                    // Check if borrower has already reviewed this booking
+                    return (
+                      <div key={b.id} className="bg-card-bg rounded-2xl border border-card-border p-5 hover:shadow-md transition-shadow">
+                        <div className="flex items-start gap-4">
+                          {/* Tool image */}
+                          <div
+                            className="h-16 w-16 rounded-xl bg-card-muted flex-shrink-0 bg-cover bg-center"
+                            style={{ backgroundImage: b.tool_image_url ? `url(${b.tool_image_url})` : undefined }}
+                          />
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">{b.tool_name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{b.tool_location}</p>
+                            <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <CalendarDays className="h-3 w-3" />
+                                {new Date(b.start_date).toLocaleDateString("en-IN")} → {new Date(b.end_date).toLocaleDateString("en-IN")}
+                              </span>
+                              <span className="font-semibold text-primary">₹{parseFloat(b.total_price).toLocaleString("en-IN")}</span>
+                            </div>
+                            {bookingsRole === "owner" && (
+                              <p className="text-xs text-gray-400 mt-1">Borrower: <span className="font-medium text-gray-700 dark:text-gray-300">{b.borrower_name}</span></p>
+                            )}
+                            {bookingsRole === "borrower" && (
+                              <p className="text-xs text-gray-400 mt-1">Owner: <span className="font-medium text-gray-700 dark:text-gray-300">{b.owner_name}</span></p>
+                            )}
+                          </div>
+                          {/* Status badge */}
+                          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 ${STATUS_COLOR[b.status] ?? "bg-gray-100 text-gray-600"}`}>
+                            {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
                           </span>
-                          <span className="font-semibold text-primary">₹{parseFloat(b.total_price).toLocaleString("en-IN")}</span>
                         </div>
+
+                        {/* ── Action Buttons ── */}
                         {bookingsRole === "owner" && (
-                          <p className="text-xs text-gray-400 mt-1">Borrower: <span className="font-medium text-gray-700 dark:text-gray-300">{b.borrower_name}</span></p>
+                          <div className="mt-3 pt-3 border-t border-card-border flex gap-2 flex-wrap">
+                            {b.status === "pending" && (
+                              <>
+                                <button
+                                  disabled={isActing}
+                                  onClick={() => updateBookingStatus(b.id, "confirmed")}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60"
+                                >
+                                  <CheckCheck className="h-3.5 w-3.5" />
+                                  {isActing ? "..." : "Confirm"}
+                                </button>
+                                <button
+                                  disabled={isActing}
+                                  onClick={() => updateBookingStatus(b.id, "cancelled")}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors disabled:opacity-60"
+                                >
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  {isActing ? "..." : "Decline"}
+                                </button>
+                              </>
+                            )}
+                            {b.status === "confirmed" && (
+                              <>
+                                <button
+                                  disabled={isActing}
+                                  onClick={() => updateBookingStatus(b.id, "active")}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-60"
+                                >
+                                  <Truck className="h-3.5 w-3.5" />
+                                  {isActing ? "..." : "Mark as Active (Tool Given)"}
+                                </button>
+                                <button
+                                  disabled={isActing}
+                                  onClick={() => updateBookingStatus(b.id, "cancelled")}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors disabled:opacity-60"
+                                >
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  {isActing ? "..." : "Cancel"}
+                                </button>
+                              </>
+                            )}
+                            {b.status === "active" && (
+                              <button
+                                disabled={isActing}
+                                onClick={() => updateBookingStatus(b.id, "completed")}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-60"
+                              >
+                                <RotateCcw className="h-3.5 w-3.5" />
+                                {isActing ? "..." : "Mark as Returned"}
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {bookingsRole === "borrower" && (
+                          <div className="mt-3 pt-3 border-t border-card-border flex gap-2 flex-wrap">
+                            {(b.status === "pending" || b.status === "confirmed") && (
+                              <button
+                                disabled={isActing}
+                                onClick={() => updateBookingStatus(b.id, "cancelled")}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-200 transition-colors disabled:opacity-60"
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                                {isActing ? "..." : "Cancel Booking"}
+                              </button>
+                            )}
+                            {b.status === "completed" && (
+                              <button
+                                onClick={() => setReviewBooking({ id: b.id, toolName: b.tool_name })}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors"
+                              >
+                                <Star className="h-3.5 w-3.5" />
+                                Leave a Review
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 ${STATUS_COLOR[b.status] ?? "bg-gray-100 text-gray-600"}`}>
-                        {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
