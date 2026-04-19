@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Star, User, CalendarDays, Pencil, Trash2 } from "lucide-react";
+import { MapPin, Star, User, CalendarDays, Pencil, Trash2, Wrench, CheckCircle } from "lucide-react";
 
-export type ToolStatus = "available" | "borrowed" | "reserved";
+export type ToolStatus = "available" | "borrowed" | "reserved" | "maintenance";
 
 export interface ToolProps {
   id: string;
@@ -19,22 +19,27 @@ export interface ToolProps {
 
 interface ToolCardProps {
   tool: ToolProps;
-  onBook?: (tool: ToolProps) => void;   // shown on All Tools tab
-  onEdit?: (tool: ToolProps) => void;   // shown on My Tools tab
-  onDelete?: (tool: ToolProps) => void; // shown on My Tools tab
+  onBook?:         (tool: ToolProps) => void;  // All Tools tab
+  onEdit?:         (tool: ToolProps) => void;  // My Tools tab
+  onDelete?:       (tool: ToolProps) => void;  // My Tools tab
+  onMaintain?:     (tool: ToolProps) => void;  // My Tools tab → mark maintenance
+  onSetAvailable?: (tool: ToolProps) => void;  // Maintenance tab → restore
 }
 
-export default function ToolCard({ tool, onBook, onEdit, onDelete }: ToolCardProps) {
+export default function ToolCard({
+  tool, onBook, onEdit, onDelete, onMaintain, onSetAvailable,
+}: ToolCardProps) {
   const [deleting, setDeleting] = useState(false);
 
-  const statusConfig = {
-    available: { badge: "bg-green-500/90 text-white", label: "Available" },
-    borrowed:  { badge: "bg-red-500/90 text-white",   label: "Borrowed" },
-    reserved:  { badge: "bg-yellow-500/90 text-white", label: "Reserved" },
+  const statusConfig: Record<ToolStatus, { badge: string; label: string }> = {
+    available:   { badge: "bg-green-500/90 text-white",  label: "Available"   },
+    borrowed:    { badge: "bg-red-500/90 text-white",    label: "Borrowed"    },
+    reserved:    { badge: "bg-yellow-500/90 text-white", label: "Reserved"    },
+    maintenance: { badge: "bg-orange-500/90 text-white", label: "Maintenance" },
   };
 
-  const currentStatus = statusConfig[tool.status];
-  const isOwnerView   = !!(onEdit || onDelete);
+  const currentStatus = statusConfig[tool.status] ?? statusConfig.available;
+  const isOwnerView   = !!(onEdit || onDelete || onMaintain || onSetAvailable);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -97,6 +102,7 @@ export default function ToolCard({ tool, onBook, onEdit, onDelete }: ToolCardPro
 
         {/* Action Buttons */}
         <div className="mt-4 pt-3 border-t border-card-border">
+
           {/* All Tools view: Book Now */}
           {!isOwnerView && onBook && (
             <button
@@ -113,9 +119,20 @@ export default function ToolCard({ tool, onBook, onEdit, onDelete }: ToolCardPro
             </button>
           )}
 
-          {/* My Tools view: Edit + Delete */}
-          {isOwnerView && (
-            <div className="flex gap-2">
+          {/* Maintenance tab: Set Available button */}
+          {onSetAvailable && (
+            <button
+              onClick={() => onSetAvailable(tool)}
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Set Available
+            </button>
+          )}
+
+          {/* My Tools view: Edit + Delete + Mark Maintenance */}
+          {!onSetAvailable && isOwnerView && (
+            <div className="flex gap-2 flex-wrap">
               {onEdit && (
                 <button
                   onClick={() => onEdit(tool)}
@@ -123,6 +140,15 @@ export default function ToolCard({ tool, onBook, onEdit, onDelete }: ToolCardPro
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Edit
+                </button>
+              )}
+              {onMaintain && tool.status !== "maintenance" && (
+                <button
+                  onClick={() => onMaintain(tool)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-sm font-medium bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50 transition-colors"
+                >
+                  <Wrench className="h-3.5 w-3.5" />
+                  Maintenance
                 </button>
               )}
               {onDelete && (

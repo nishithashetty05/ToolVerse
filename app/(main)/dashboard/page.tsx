@@ -6,15 +6,18 @@ import Link from "next/link";
 import {
   AlertCircle, CalendarDays, CheckCircle2, Clock,
   Plus, Search, ShieldAlert, Tractor, Users,
+  Wrench, UserCheck, Filter,
 } from "lucide-react";
 import ToolCard, { ToolProps } from "@/components/ui/ToolCard";
 import BookingModal  from "@/components/ui/BookingModal";
 import EditToolModal from "@/components/ui/EditToolModal";
+import ExpertCard    from "@/components/ui/ExpertCard";
+import type { ExpertResponse } from "@/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ApiTool {
   id: number; name: string; categoryName: string;
-  status: "available" | "borrowed" | "reserved";
+  status: "available" | "borrowed" | "reserved" | "maintenance";
   location: string; ownerName: string;
   rating: number; pricePerDay: number; imageUrl: string | null;
 }
@@ -31,7 +34,7 @@ interface ApiBooking {
 function toToolProps(t: ApiTool): ToolProps {
   return {
     id: String(t.id), name: t.name, category: t.categoryName,
-    status: t.status === "reserved" ? "reserved" : t.status === "borrowed" ? "borrowed" : "available",
+    status: t.status,
     location: t.location, owner: t.ownerName,
     rating: t.rating, pricePerDay: t.pricePerDay,
     imageUrl: t.imageUrl ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",
@@ -66,9 +69,21 @@ export default function DashboardPage() {
   const [editingTool,  setEditingTool]  = useState<ToolProps | null>(null);
 
   // ── Activity / Bookings state ──
-  const [bookings,       setBookings]      = useState<ApiBooking[]>([]);
-  const [bookingsRole,   setBookingsRole]  = useState<"borrower" | "owner">("borrower");
+  const [bookings,        setBookings]       = useState<ApiBooking[]>([]);
+  const [bookingsRole,    setBookingsRole]   = useState<"borrower" | "owner">("borrower");
   const [bookingsLoading, setBookingsLoading] = useState(false);
+
+  // ── Maintenance tab state ──
+  const [maintTools,   setMaintTools]   = useState<ToolProps[]>([]);
+  const [maintLoading, setMaintLoading] = useState(false);
+
+  // ── Experts tab state ──
+  const [experts,        setExperts]       = useState<ExpertResponse[]>([]);
+  const [expertTotal,    setExpertTotal]   = useState(0);
+  const [expertsLoading, setExpertsLoading] = useState(false);
+  const [expertSearch,   setExpertSearch]  = useState("");
+  const [availFilter,    setAvailFilter]   = useState("");
+  const [showExpertForm, setShowExpertForm] = useState(false);
 
   // ── Booking Modal ──
   const [bookingTool, setBookingTool] = useState<ToolProps | null>(null);
@@ -78,11 +93,11 @@ export default function DashboardPage() {
   const totalReserved = tools.filter(t => t.status === "reserved").length;
 
   const tabs = [
-    { id: "tools",       label: "All Tools"    },
-    { id: "my-tools",    label: "My Tools"     },
-    { id: "activity",    label: "Activity"     },
-    { id: "maintenance", label: "Maintenance"  },
-    { id: "experts",     label: "Experts"      },
+    { id: "tools",       label: "All Tools"   },
+    { id: "my-tools",    label: "My Tools"    },
+    { id: "activity",    label: "Activity"    },
+    { id: "maintenance", label: "Maintenance" },
+    { id: "experts",     label: "Experts"     },
   ];
 
   // ── Fetch All Tools ─────────────────────────────────────────────────────────
@@ -126,6 +141,53 @@ export default function DashboardPage() {
     finally { setBookingsLoading(false); }
   }, []);
 
+  // ── Fetch Maintenance Tools ─────────────────────────────────────────────────
+  const fetchMaintTools = useCallback(async () => {
+    setMaintLoading(true);
+    try {
+      const res  = await fetch("/api/tools?status=maintenance&limit=50");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setMaintTools((data.tools as ApiTool[]).map(toToolProps));
+    } catch { setMaintTools([]); }
+    finally { setMaintLoading(false); }
+  }, []);
+
+  // ── Fetch Experts ───────────────────────────────────────────────────────────
+  const fetchExperts = useCallback(async () => {
+    setExpertsLoading(true);
+    try {
+      const p = new URLSearchParams();
+      if (expertSearch) p.set("search", expertSearch);
+      if (availFilter)  p.set("available", availFilter);
+      p.set("limit", "20");
+      const res  = await fetch(`/api/experts?${p}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setExperts(data.experts ?? []);
+      setExpertTotal(data.total ?? 0);
+    } catch { setExperts([]); }
+    finally { setExpertsLoading(false); }
+  }, [expertSearch, availFilter]);
+
+  // ── Status Toggle Helpers ───────────────────────────────────────────────────
+  const setToolStatus = async (tool: ToolProps, status: string) => {
+    try {
+      const res = await fetch(`/api/tools/${tool.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.error ?? "Failed to update status");
+        return;
+      }
+      fetchMyTools();
+      if (currentTab === "maintenance") fetchMaintTools();
+    } catch { alert("Failed to update tool status"); }
+  };
+
   // ── Delete Tool ─────────────────────────────────────────────────────────────
   const handleDeleteTool = async (tool: ToolProps) => {
     try {
@@ -141,9 +203,11 @@ export default function DashboardPage() {
 
   // ── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (currentTab === "tools")    fetchTools();
-    if (currentTab === "my-tools") fetchMyTools();
-    if (currentTab === "activity") fetchBookings(bookingsRole);
+    if (currentTab === "tools")       fetchTools();
+    if (currentTab === "my-tools")    fetchMyTools();
+    if (currentTab === "activity")    fetchBookings(bookingsRole);
+    if (currentTab === "maintenance") fetchMaintTools();
+    if (currentTab === "experts")     fetchExperts();
   }, [currentTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -153,6 +217,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (currentTab === "activity") fetchBookings(bookingsRole);
   }, [bookingsRole]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (currentTab === "experts") fetchExperts();
+  }, [expertSearch, availFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -285,7 +353,9 @@ export default function DashboardPage() {
                   {myTools.map((t) => (
                     <ToolCard key={t.id} tool={t}
                       onEdit={() => setEditingTool(t)}
-                      onDelete={handleDeleteTool} />
+                      onDelete={handleDeleteTool}
+                      onMaintain={(tool) => setToolStatus(tool, "maintenance")}
+                    />
                   ))}
                 </div>
               )}
@@ -355,12 +425,10 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   {bookings.map((b) => (
                     <div key={b.id} className="bg-card-bg rounded-2xl border border-card-border p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-                      {/* Tool image */}
                       <div
                         className="h-16 w-16 rounded-xl bg-card-muted flex-shrink-0 bg-cover bg-center"
                         style={{ backgroundImage: b.tool_image_url ? `url(${b.tool_image_url})` : undefined }}
                       />
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">{b.tool_name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{b.tool_location}</p>
@@ -376,7 +444,6 @@ export default function DashboardPage() {
                           <p className="text-xs text-gray-400 mt-1">Borrower: <span className="font-medium text-gray-700 dark:text-gray-300">{b.borrower_name}</span></p>
                         )}
                       </div>
-                      {/* Status badge */}
                       <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 ${STATUS_COLOR[b.status] ?? "bg-gray-100 text-gray-600"}`}>
                         {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
                       </span>
@@ -387,13 +454,141 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── COMING SOON ── */}
-          {["maintenance", "experts"].includes(currentTab) && (
-            <EmptyState
-              icon={<AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
-              title="Coming Soon"
-              message={`The ${tabs.find((t) => t.id === currentTab)?.label} feature is under development.`}
-            />
+          {/* ── MAINTENANCE ── */}
+          {currentTab === "maintenance" && (
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Wrench className="h-5 w-5 text-orange-500" />
+                    Tools Under Maintenance
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    These tools are temporarily unavailable for booking.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchMaintTools}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-card-muted text-gray-600 dark:text-gray-300 hover:bg-card-border transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {/* Info banner */}
+              <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/50 rounded-xl p-4 flex items-start gap-3">
+                <Wrench className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-orange-800 dark:text-orange-300">Mark your tools as &quot;Under Maintenance&quot;</p>
+                  <p className="text-orange-600 dark:text-orange-400 mt-0.5">
+                    Go to <strong>My Tools</strong> and click the &quot;Maintenance&quot; button on any tool to temporarily block bookings.
+                    Come back here to restore it.
+                  </p>
+                </div>
+              </div>
+
+              {maintLoading && <SkeletonGrid count={3} />}
+
+              {!maintLoading && maintTools.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {maintTools.map((t) => (
+                    <ToolCard
+                      key={t.id}
+                      tool={t}
+                      onSetAvailable={(tool) => setToolStatus(tool, "available")}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {!maintLoading && maintTools.length === 0 && (
+                <EmptyState
+                  icon={<CheckCircle2 className="h-12 w-12 text-green-400 mx-auto mb-4" />}
+                  title="All tools are operational"
+                  message="No tools are currently under maintenance. Great news!"
+                />
+              )}
+            </div>
+          )}
+
+          {/* ── EXPERTS ── */}
+          {currentTab === "experts" && (
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <UserCheck className="h-5 w-5 text-primary" />
+                    Agricultural Experts
+                    {!expertsLoading && (
+                      <span className="text-sm font-normal text-gray-400">({expertTotal} experts)</span>
+                    )}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    Connect with verified agricultural consultants in your area.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowExpertForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
+                >
+                  <Plus className="h-4 w-4" /> Register as Expert
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-3 flex-wrap">
+                <div className="relative">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={expertSearch}
+                    onChange={(e) => setExpertSearch(e.target.value)}
+                    placeholder="Search by name, specialty, location..."
+                    className="pl-9 pr-4 py-2 border border-card-border rounded-lg text-sm bg-card-bg outline-none focus:ring-2 focus:ring-primary w-full sm:w-72"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-400" />
+                  <select
+                    value={availFilter}
+                    onChange={(e) => setAvailFilter(e.target.value)}
+                    className="px-3 py-2 border border-card-border rounded-lg text-sm bg-card-bg text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">All Experts</option>
+                    <option value="true">Available Now</option>
+                    <option value="false">Unavailable</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Register Form */}
+              {showExpertForm && (
+                <RegisterExpertForm
+                  onSuccess={() => { setShowExpertForm(false); fetchExperts(); }}
+                  onCancel={() => setShowExpertForm(false)}
+                />
+              )}
+
+              {expertsLoading && <SkeletonGrid count={4} />}
+
+              {!expertsLoading && experts.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {experts.map((e) => (
+                    <ExpertCard key={e.id} expert={e} />
+                  ))}
+                </div>
+              )}
+
+              {!expertsLoading && experts.length === 0 && (
+                <EmptyState
+                  icon={<UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+                  title="No experts found"
+                  message={expertSearch ? "Try a different search term." : "Be the first to register as an agricultural expert!"}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -401,7 +596,7 @@ export default function DashboardPage() {
   );
 }
 
-// ── Helper UI Components ───────────────────────────────────────────────────────
+// ── Helper UI Components ────────────────────────────────────────────────────────
 function SkeletonGrid({ count }: { count: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -422,7 +617,7 @@ function EmptyState({ icon, title, message }: { icon: React.ReactNode; title: st
   );
 }
 
-// ── Add Tool Form ──────────────────────────────────────────────────────────────
+// ── Add Tool Form ───────────────────────────────────────────────────────────────
 function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
   const [form, setForm] = useState({ name:"", location:"", pricePerDay:"", description:"", condition:"good", categoryId:"1", imageUrl:"" });
   const [submitting, setSubmitting] = useState(false);
@@ -499,6 +694,142 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
           <button type="submit" disabled={submitting}
             className="px-5 py-2 rounded-xl text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20 disabled:opacity-60">
             {submitting ? "Saving..." : "List Tool"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ── Register Expert Form ────────────────────────────────────────────────────────
+function RegisterExpertForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+  const SPECIALTIES = [
+    "Soil Health & Fertilisation",
+    "Irrigation & Water Management",
+    "Pest & Disease Control",
+    "Organic Farming",
+    "Tractor & Equipment Repair",
+    "Greenhouse & Horticulture",
+    "Crop Planning & Rotation",
+    "Post-Harvest & Storage",
+    "Other",
+  ];
+
+  const [form, setForm] = useState({
+    name: "", specialty: SPECIALTIES[0], bio: "",
+    location: "", phone: "", email: "",
+    yearsExp: "", ratePerDay: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true); setErr("");
+    try {
+      await fetch("/api/users/sync", { method: "POST" });
+      const res = await fetch("/api/experts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name:       form.name,
+          specialty:  form.specialty,
+          bio:        form.bio        || undefined,
+          location:   form.location,
+          phone:      form.phone      || undefined,
+          email:      form.email      || undefined,
+          yearsExp:   form.yearsExp   ? parseInt(form.yearsExp)   : undefined,
+          ratePerDay: form.ratePerDay ? parseFloat(form.ratePerDay) : undefined,
+        }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "Registration failed"); }
+      onSuccess();
+    } catch (e) { setErr((e as Error).message); }
+    finally { setSubmitting(false); }
+  };
+
+  return (
+    <div className="bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Register as an Expert</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        Share your knowledge with farmers in your region.
+      </p>
+      {err && <p className="text-sm text-red-500 mb-3">{err}</p>}
+
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
+          <input required type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="e.g. Rajan Kumar"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Location */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location *</label>
+          <input required type="text" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
+            placeholder="e.g. Hassan, Karnataka"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Specialty */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Specialty *</label>
+          <select required value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })}
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary">
+            {SPECIALTIES.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+
+        {/* Rate per day */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consultation Rate/Day (₹) *</label>
+          <input required type="number" min="1" value={form.ratePerDay} onChange={(e) => setForm({ ...form, ratePerDay: e.target.value })}
+            placeholder="1000"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+          <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            placeholder="+91 98765 43210"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+            placeholder="you@example.com"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Years experience */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Years of Experience</label>
+          <input type="number" min="0" value={form.yearsExp} onChange={(e) => setForm({ ...form, yearsExp: e.target.value })}
+            placeholder="e.g. 10"
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+
+        {/* Bio — spans full width */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio / About You</label>
+          <textarea rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            placeholder="Tell farmers about your expertise, achievements, and how you can help..."
+            className="w-full px-3 py-2.5 border border-card-border rounded-xl bg-card-muted text-gray-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary resize-none" />
+        </div>
+
+        <div className="md:col-span-2 flex gap-3 justify-end">
+          <button type="button" onClick={onCancel}
+            className="px-5 py-2 rounded-xl text-sm font-medium bg-card-muted text-gray-700 dark:text-gray-200 hover:bg-card-border transition-colors">
+            Cancel
+          </button>
+          <button type="submit" disabled={submitting}
+            className="px-5 py-2 rounded-xl text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20 disabled:opacity-60">
+            {submitting ? "Registering..." : "Register as Expert"}
           </button>
         </div>
       </form>

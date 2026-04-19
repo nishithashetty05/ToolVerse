@@ -144,3 +144,53 @@ export interface CreateBookingBody {
   endDate: string;
   notes?: string;
 }
+
+// ---------------------------------------------------------------
+// Experts
+// ---------------------------------------------------------------
+
+export interface DbExpert {
+  id: number;
+  user_id: number | null;
+  name: string;
+  specialty: string;
+  bio: string | null;
+  location: string;
+  phone: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  years_exp: number | null;
+  rate_per_day: string; // NUMERIC returned as string by pg
+  available: boolean;
+  created_at: Date;
+}
+
+export interface ExpertResponse {
+  id: number;
+  userId: number | null;
+  name: string;
+  specialty: string;
+  bio: string | null;
+  location: string;
+  phone: string | null;
+  email: string | null;
+  avatarUrl: string | null;
+  yearsExp: number | null;
+  ratePerDay: number;
+  available: boolean;
+  createdAt: string;
+}
+
+export interface CreateExpertBody {
+  name: string;
+  specialty: string;
+  bio?: string;
+  location: string;
+  phone?: string;
+  email?: string;
+  avatarUrl?: string;
+  yearsExp?: number;
+  ratePerDay: number;
+}
+
+export type UpdateExpertBody = Partial<CreateExpertBody> & { available?: boolean };
