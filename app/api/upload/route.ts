@@ -1,20 +1,21 @@
 // =============================================================
 // POST /api/upload
 // Accepts: multipart/form-data with field "file"
-// Saves to: public/uploads/tools/<uuid>.<ext>
-// Returns: { url: "/uploads/tools/<uuid>.<ext>" }
-//
-// NOTE: local filesystem storage is perfect for development.
-// For production on Vercel/serverless, swap this out for
-// an object store (S3, Cloudinary, etc.), since the
-// filesystem is ephemeral there.
+// Saves to: Cloudinary
+// Returns: { url: "https://res.cloudinary.com/..." }
 // =============================================================
 
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join, extname } from 'path';
-import { randomUUID } from 'crypto';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary using env vars
+// Requires: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Unauthorised' }, { status: 401 });
     }
 
-    // Parse multipart form data (built-in Web API — no extra deps)
+    // Parse multipart form data
     let formData: FormData;
     try {
       formData = await request.formData();
@@ -56,21 +57,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine save path: public/uploads/tools/<uuid>.<ext>
-    const ext       = extname(file.name).toLowerCase() || '.jpg';
-    const filename  = `${randomUUID()}${ext}`;
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'tools');
-    const filePath  = join(uploadDir, filename);
-
-    // Ensure directory exists (idempotent)
-    await mkdir(uploadDir, { recursive: true });
-
-    // Stream file contents to disk
+    // Convert Web File to Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
 
-    // Return public-facing URL (Next.js serves /public/** as /**)
-    const publicUrl = `/uploads/tools/${filename}`;
+    // Upload to Cloudinary using streams
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'toolverse/tools' }, // Organized dynamically
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      // Write buffer to stream and end
+      const { Readable } = require('stream');
+      const readableStream = new Readable();
+      readableStream.push(buffer);
+      readableStream.push(null);
+      readableStream.pipe(uploadStream);
+    });
+
+    // Cloudinary returns a secure_url
+    const publicUrl = (uploadResult as any).secure_url;
+
     return Response.json({ url: publicUrl });
   } catch (err) {
     console.error('[POST /api/upload]', err);
