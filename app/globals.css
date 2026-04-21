@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
-  --card-muted: #f1f5f9;
-  
-  --color-available: #10b981;
+  --background: #F3F0E8;
+  --foreground: #1F4D3A;
+
+  --card-bg: #FAF9F5;
+  --card-border: #D6D8D2;
+  --card-muted: #EBECE8;
+
+  --color-available: #2F6B4F;
   --color-borrowed: #ef4444;
   --color-reserved: #f59e0b;
-  
-  --color-primary: #15803d;
-  --color-primary-dark: #166534;
+
+  --color-primary: #2F6B4F;
+  --color-primary-dark: #1F4D3A;
 }
 
 @theme inline {
@@ -21,11 +21,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
+
   --color-card-bg: var(--card-bg);
   --color-card-border: var(--card-border);
   --color-card-muted: var(--card-muted);
-  
+
   --color-available: var(--color-available);
   --color-borrowed: var(--color-borrowed);
   --color-reserved: var(--color-reserved);
@@ -35,27 +35,38 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    
-    --card-bg: #1e293b;
-    --card-border: #334155;
-    --card-muted: #0f172a;
-    
-    --color-available: #10b981;
-    --color-borrowed: #f87171;
-    --color-reserved: #fbbf24;
-    
-    --color-primary: #10b981;
-    --color-primary-dark: #059669;
+    --background: #F3F0E8;
+    --foreground: #1F4D3A;
+
+    --card-bg: #FAF9F5;
+    --card-border: #D6D8D2;
+    --card-muted: #EBECE8;
+
+    --color-available: #2F6B4F;
+    --color-borrowed: #ef4444;
+    --color-reserved: #f59e0b;
+
+    --color-primary: #2F6B4F;
+    --color-primary-dark: #1F4D3A;
   }
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #1F4D3A;
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   @apply antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  color: var(--color-primary-dark);
+  letter-spacing: -0.015em;
+}
+
+.dashboard-theme *, .dashboard-theme p, .dashboard-theme span, .dashboard-theme a, .dashboard-theme h1, .dashboard-theme h2, .dashboard-theme h3, .dashboard-theme h4, .dashboard-theme h5, .dashboard-theme h6 {
+  color: #1F4D3A !important;
+  font-weight: 700 !important;
 }
 
 /* Redefined Glass Utilities for Professional Look */
@@ -72,4 +83,3 @@ body {
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--card-border);
 }
-

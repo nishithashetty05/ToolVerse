@@ -20,16 +20,16 @@ export default function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <header className="glass dark:glass-dark h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="bg-transparent h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
       <div className="flex items-center">
         <button
           onClick={onMenuClick}
-          className="text-gray-500 hover:text-primary md:hidden mr-4 p-2 -ml-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="text-gray-500 hover:text-primary md:hidden mr-4 p-2 -ml-2 rounded-md hover:bg-black/5 transition-colors"
           aria-label="Open sidebar"
         >
           <Menu className="h-6 w-6" />
         </button>
-        <Link href="/dashboard" className="hidden md:flex items-center text-xl font-bold bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent">
+        <Link href="/dashboard" className="hidden md:flex items-center text-xl font-serif font-bold text-primary">
           Agriculture Tools
         </Link>
       </div>

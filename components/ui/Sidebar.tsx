@@ -34,11 +34,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
       {/* Sidebar Content */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card-bg border-r border-card-border flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-transparent flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
-        <div className="h-16 flex items-center px-6 border-b border-card-border">
+        <div className="h-16 flex items-center px-6">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
               <Tractor className="h-5 w-5" />
@@ -60,11 +59,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 key={item.name}
                 href={item.href}
                 onClick={closeSidebar}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 ${
-                  isStrictlyActive
-                    ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-green-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-card-muted hover:text-gray-900 dark:hover:text-gray-200"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 ${isStrictlyActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground/80 hover:bg-black/5 hover:text-foreground"
+                  }`}
               >
                 <item.icon className={`h-5 w-5 ${isStrictlyActive ? "text-primary" : ""}`} />
                 {item.name}
@@ -73,9 +71,9 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-card-border">
+        <div className="p-4">
           <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors">
               <LogOut className="h-5 w-5" />
               Logout
             </button>
