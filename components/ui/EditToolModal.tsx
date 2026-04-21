@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import type { ToolProps } from "./ToolCard";
+import ImageUploadInput from "./ImageUploadInput";
 
 interface EditToolModalProps {
   tool: ToolProps;
@@ -16,6 +17,7 @@ export default function EditToolModal({ tool, onClose, onSuccess }: EditToolModa
     location:    tool.location,
     pricePerDay: String(tool.pricePerDay),
     status:      tool.status,
+    imageUrl:    tool.imageUrl,
   });
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState("");
@@ -33,6 +35,7 @@ export default function EditToolModal({ tool, onClose, onSuccess }: EditToolModa
           location:    form.location,
           pricePerDay: parseFloat(form.pricePerDay),
           status:      form.status,
+          imageUrl:    form.imageUrl,
         }),
       });
       if (!res.ok) {
@@ -67,6 +70,13 @@ export default function EditToolModal({ tool, onClose, onSuccess }: EditToolModa
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <ImageUploadInput
+              value={form.imageUrl}
+              onChange={(url) => setForm({ ...form, imageUrl: url })}
+              label="Tool Image"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tool Name</label>
             <input
