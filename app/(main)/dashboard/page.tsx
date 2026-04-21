@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -53,7 +53,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "tools";
 
@@ -62,8 +62,16 @@ export default function DashboardPage() {
   const [total,        setTotal]    = useState(0);
   const [loading,      setLoading]  = useState(false);
   const [error,        setError]    = useState("");
-  const [search,       setSearch]   = useState("");
-  const [statusFilter, setStatus]   = useState("");
+  const [search,       setSearch]   = useState(searchParams.get("search") || "");
+  const [statusFilter, setStatus]   = useState(searchParams.get("status") || "");
+
+  // Update local state when URL search params change
+  useEffect(() => {
+    const s = searchParams.get("search");
+    if (s !== null) {
+      setSearch(s);
+    }
+  }, [searchParams]);
 
   // ── My Tools state ──
   const [myTools,      setMyTools]      = useState<ToolProps[]>([]);
@@ -88,9 +96,16 @@ export default function DashboardPage() {
   const [experts,        setExperts]       = useState<ExpertResponse[]>([]);
   const [expertTotal,    setExpertTotal]   = useState(0);
   const [expertsLoading, setExpertsLoading] = useState(false);
-  const [expertSearch,   setExpertSearch]  = useState("");
+  const [expertSearch,   setExpertSearch]  = useState(searchParams.get("search") || "");
   const [availFilter,    setAvailFilter]   = useState("");
   const [showExpertForm, setShowExpertForm] = useState(false);
+
+  useEffect(() => {
+    const s = searchParams.get("search");
+    if (s !== null) {
+      if (currentTab === "experts") setExpertSearch(s);
+    }
+  }, [searchParams, currentTab]);
 
   // ── Booking Modal ──
   const [bookingTool, setBookingTool] = useState<ToolProps | null>(null);
@@ -740,6 +755,14 @@ export default function DashboardPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <React.Suspense fallback={<div className="p-8 flex justify-center text-gray-500">Loading dashboard...</div>}>
+      <DashboardContent />
+    </React.Suspense>
   );
 }
 
