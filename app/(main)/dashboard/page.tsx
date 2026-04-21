@@ -572,6 +572,16 @@ export default function DashboardPage() {
                                 {isActing ? "..." : "Cancel Booking"}
                               </button>
                             )}
+                            {b.status === "active" && (
+                              <button
+                                disabled={isActing}
+                                onClick={() => updateBookingStatus(b.id, "completed")}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-60"
+                              >
+                                <RotateCcw className="h-3.5 w-3.5" />
+                                {isActing ? "..." : "Mark as Returned"}
+                              </button>
+                            )}
                             {b.status === "completed" && (
                               <button
                                 onClick={() => setReviewBooking({ id: b.id, toolName: b.tool_name })}

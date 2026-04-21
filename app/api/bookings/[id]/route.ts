@@ -13,7 +13,7 @@ const VALID_TRANSITIONS: Record<string, Record<string, string[]>> = {
   // role → current_status → allowed_new_statuses
   owner: {
     pending:   ['confirmed', 'cancelled'],
-    confirmed: ['cancelled'],
+    confirmed: ['cancelled', 'active'],
     active:    ['completed'],
   },
   borrower: {
