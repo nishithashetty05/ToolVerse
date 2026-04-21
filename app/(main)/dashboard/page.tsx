@@ -21,7 +21,7 @@ import type { ExpertResponse } from "@/types";
 interface ApiTool {
   id: number; name: string; categoryName: string;
   status: "available" | "borrowed" | "reserved" | "maintenance";
-  location: string; ownerName: string;
+  location: string; ownerName: string; condition: string;
   rating: number; pricePerDay: number; imageUrl: string | null;
 }
 
@@ -37,7 +37,7 @@ interface ApiBooking {
 function toToolProps(t: ApiTool): ToolProps {
   return {
     id: String(t.id), name: t.name, category: t.categoryName,
-    status: t.status,
+    status: t.status, condition: t.condition,
     location: t.location, owner: t.ownerName,
     rating: t.rating, pricePerDay: t.pricePerDay,
     imageUrl: t.imageUrl || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",

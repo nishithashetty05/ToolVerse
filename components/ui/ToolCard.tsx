@@ -10,6 +10,7 @@ export interface ToolProps {
   name: string;
   category: string;
   status: ToolStatus;
+  condition?: string;
   location: string;
   owner: string;
   rating: number;
@@ -89,6 +90,18 @@ export default function ToolCard({
             <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
             <span className="line-clamp-1">{tool.location}</span>
           </div>
+          {tool.condition && (
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
+                tool.condition.toLowerCase() === 'excellent' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' :
+                tool.condition.toLowerCase() === 'good' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' :
+                tool.condition.toLowerCase() === 'fair' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800' :
+                'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+              }`}>
+                {tool.condition.charAt(0).toUpperCase() + tool.condition.slice(1)} condition
+              </span>
+            </div>
+          )}
           <div className="flex text-xs items-center gap-2 border-t border-card-border pt-3 mt-3">
             <div className="h-6 w-6 rounded-full bg-card-muted flex items-center justify-center flex-shrink-0">
               <User className="h-3 w-3 text-gray-500" />
