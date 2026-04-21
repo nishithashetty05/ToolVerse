@@ -40,7 +40,7 @@ function toToolProps(t: ApiTool): ToolProps {
     status: t.status,
     location: t.location, owner: t.ownerName,
     rating: t.rating, pricePerDay: t.pricePerDay,
-    imageUrl: t.imageUrl ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",
+    imageUrl: t.imageUrl || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",
   };
 }
 
@@ -376,7 +376,12 @@ export default function DashboardPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Tool Listings</h2>
-                <button onClick={() => setShowAddForm(true)}
+                <button onClick={() => {
+                  setShowAddForm(true);
+                  setTimeout(() => {
+                    document.getElementById("add-tool-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 50);
+                }}
                   className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
                   <Plus className="h-4 w-4" /> Add New Tool
                 </button>
@@ -405,7 +410,12 @@ export default function DashboardPage() {
                   <p className="text-gray-500 max-w-md mx-auto mb-6">
                     List your unused agricultural equipment and start earning.
                   </p>
-                  <button onClick={() => setShowAddForm(true)}
+                  <button onClick={() => {
+                    setShowAddForm(true);
+                    setTimeout(() => {
+                      document.getElementById("add-tool-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 50);
+                  }}
                     className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30">
                     <Plus className="h-4 w-4" /> Add New Tool
                   </button>
@@ -468,7 +478,7 @@ export default function DashboardPage() {
                           {/* Tool image */}
                           <div
                             className="h-16 w-16 rounded-xl bg-card-muted flex-shrink-0 bg-cover bg-center"
-                            style={{ backgroundImage: b.tool_image_url ? `url(${b.tool_image_url})` : undefined }}
+                            style={{ backgroundImage: `url(${b.tool_image_url || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600"})` }}
                           />
                           {/* Info */}
                           <div className="flex-1 min-w-0">
@@ -777,7 +787,7 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
   };
 
   return (
-    <div className="bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm">
+    <div id="add-tool-form" className="bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">List a New Tool</h3>
       {err && <p className="text-sm text-red-500 mb-3">{err}</p>}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
