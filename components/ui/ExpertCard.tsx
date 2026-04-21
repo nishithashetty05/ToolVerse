@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Phone, Mail, Clock, Star, BadgeCheck, DollarSign } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Star, BadgeCheck, IndianRupee } from "lucide-react";
 import type { ExpertResponse } from "@/types";
 
 const SPECIALTY_COLORS: Record<string, string> = {
@@ -127,7 +127,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
         {/* Rate */}
         <div className="pt-3 border-t border-card-border flex items-center gap-3 mt-auto">
           <div className="flex items-center gap-1">
-            <DollarSign className="h-4 w-4 text-primary" />
+            <IndianRupee className="h-4 w-4 text-primary" />
             <span className="text-base font-bold text-gray-900 dark:text-white">
               ₹{expert.ratePerDay.toLocaleString("en-IN")}
             </span>
