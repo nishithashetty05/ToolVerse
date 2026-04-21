@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Settings, Tractor, User, Wrench } from "lucide-react";
+import { LayoutDashboard, LogOut, Tractor, User, Wrench } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 
 interface SidebarProps {
@@ -18,8 +18,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     { name: "My Tools", href: "/dashboard?tab=my-tools", icon: Tractor },
     { name: "Activity", href: "/dashboard?tab=activity", icon: Wrench },
     { name: "Profile", href: "/profile", icon: User },
-    // Removed Admin panel per user request
-    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   const closeSidebar = () => setIsOpen(false);

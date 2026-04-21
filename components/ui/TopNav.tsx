@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
 export default function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
@@ -28,10 +28,7 @@ export default function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </div>
 
-        <button className="relative p-2 text-gray-500 hover:text-primary rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mr-2">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 border border-white dark:border-gray-900"></span>
-        </button>
+
 
         <div className="flex items-center">
           <UserButton />

@@ -30,13 +30,7 @@ interface ExpertCardProps {
 }
 
 export default function ExpertCard({ expert }: ExpertCardProps) {
-  const handleContact = () => {
-    if (expert.phone) {
-      window.open(`tel:${expert.phone}`);
-    } else if (expert.email) {
-      window.open(`mailto:${expert.email}`);
-    }
-  };
+
 
   return (
     <div className="bg-card-bg rounded-2xl border border-card-border overflow-hidden hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 flex flex-col">
@@ -130,8 +124,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           )}
         </div>
 
-        {/* Rate + CTA */}
-        <div className="pt-3 border-t border-card-border flex items-center justify-between gap-3 mt-auto">
+        {/* Rate */}
+        <div className="pt-3 border-t border-card-border flex items-center gap-3 mt-auto">
           <div className="flex items-center gap-1">
             <DollarSign className="h-4 w-4 text-primary" />
             <span className="text-base font-bold text-gray-900 dark:text-white">
@@ -139,24 +133,6 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
             </span>
             <span className="text-xs text-gray-500">/day</span>
           </div>
-
-          <button
-            onClick={handleContact}
-            disabled={!expert.available || (!expert.phone && !expert.email)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              expert.available && (expert.phone || expert.email)
-                ? "bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/20 active:scale-95"
-                : "bg-card-muted text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            {expert.phone ? (
-              <><Phone className="h-3.5 w-3.5" /> Call</>
-            ) : expert.email ? (
-              <><Mail className="h-3.5 w-3.5" /> Email</>
-            ) : (
-              "Unavailable"
-            )}
-          </button>
         </div>
       </div>
     </div>
