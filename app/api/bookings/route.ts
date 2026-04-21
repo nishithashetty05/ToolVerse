@@ -241,9 +241,12 @@ export async function GET(request: NextRequest) {
       tool_name: string;
       tool_location: string;
       tool_image_url: string | null;
+      tool_contact_phone: string | null;
       borrower_id: number;
       borrower_name: string;
+      borrower_phone: string | null;
       owner_name: string;
+      owner_phone: string | null;
       start_date: Date;
       end_date: Date;
       total_price: string;
@@ -257,9 +260,12 @@ export async function GET(request: NextRequest) {
          t.name          AS tool_name,
          t.location      AS tool_location,
          t.image_url     AS tool_image_url,
+         t.contact_phone AS tool_contact_phone,
          b.borrower_id,
          borrower.name   AS borrower_name,
+         borrower.phone  AS borrower_phone,
          owner.name      AS owner_name,
+         owner.phone     AS owner_phone,
          b.start_date,
          b.end_date,
          b.total_price,

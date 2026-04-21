@@ -28,7 +28,9 @@ interface ApiTool {
 interface ApiBooking {
   id: number; tool_id: number; tool_name: string;
   tool_location: string; tool_image_url: string | null;
-  borrower_name: string; owner_name: string;
+  tool_contact_phone: string | null;
+  borrower_name: string; borrower_phone: string | null;
+  owner_name: string; owner_phone: string | null;
   start_date: string; end_date: string;
   total_price: string; status: string; notes: string | null;
   created_at: string;
@@ -507,10 +509,20 @@ function DashboardContent() {
                               <span className="font-semibold text-primary">₹{parseFloat(b.total_price).toLocaleString("en-IN")}</span>
                             </div>
                             {bookingsRole === "owner" && (
-                              <p className="text-xs text-gray-400 mt-1">Borrower: <span className="font-medium text-gray-700 dark:text-gray-300">{b.borrower_name}</span></p>
+                              <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-2 items-center">
+                                <span>Borrower: <span className="font-medium text-gray-700 dark:text-gray-300">{b.borrower_name}</span></span>
+                                {(b.status === "confirmed" || b.status === "active" || b.status === "completed") && b.borrower_phone && (
+                                  <span className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded flex items-center gap-1">📞 {b.borrower_phone}</span>
+                                )}
+                              </div>
                             )}
                             {bookingsRole === "borrower" && (
-                              <p className="text-xs text-gray-400 mt-1">Owner: <span className="font-medium text-gray-700 dark:text-gray-300">{b.owner_name}</span></p>
+                              <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-2 items-center">
+                                <span>Owner: <span className="font-medium text-gray-700 dark:text-gray-300">{b.owner_name}</span></span>
+                                {(b.status === "confirmed" || b.status === "active" || b.status === "completed") && b.tool_contact_phone && (
+                                  <span className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded flex items-center gap-1">📞 {b.tool_contact_phone}</span>
+                                )}
+                              </div>
                             )}
                           </div>
                           {/* Status badge */}
@@ -792,7 +804,7 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
   const [form, setForm] = useState({
     name: "", location: "", pricePerDay: "",
     description: "", condition: "good", categoryId: "1",
-    imageUrl: "",
+    imageUrl: "", contactPhone: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState("");
@@ -811,6 +823,7 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
           description: form.description || undefined,
           condition: form.condition, categoryId: parseInt(form.categoryId),
           imageUrl: form.imageUrl || undefined,
+          contactPhone: form.contactPhone || undefined,
         }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "Failed"); }
@@ -839,6 +852,7 @@ function AddToolForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel:
           { label: "Tool Name *",     key: "name",        type: "text",   placeholder: "e.g. John Deere Tractor" },
           { label: "Location *",      key: "location",    type: "text",   placeholder: "e.g. North District" },
           { label: "Price/Day (₹) *", key: "pricePerDay", type: "number", placeholder: "500" },
+          { label: "Contact Phone",   key: "contactPhone",type: "tel",    placeholder: "e.g. +91 9876543210" },
         ].map(({ label, key, type, placeholder }) => (
           <div key={key}>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>

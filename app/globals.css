@@ -63,12 +63,14 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-primary-dark);
   letter-spacing: -0.015em;
 }
-
 .dashboard-theme *, .dashboard-theme p, .dashboard-theme span, .dashboard-theme a, .dashboard-theme h1, .dashboard-theme h2, .dashboard-theme h3, .dashboard-theme h4, .dashboard-theme h5, .dashboard-theme h6 {
   color: #1F4D3A !important;
   font-weight: 700 !important;
 }
 
+.dashboard-theme .text-white, .dashboard-theme .text-white * {
+  color: #ffffff !important;
+}
 /* Redefined Glass Utilities for Professional Look */
 @utility glass {
   background: rgba(255, 255, 255, 0.6);

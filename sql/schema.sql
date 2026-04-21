@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS tools (
                 DEFAULT 'good',
 
   image_url     VARCHAR(500),
+  contact_phone VARCHAR(20),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -169,6 +170,7 @@ SELECT
   t.status,
   t.condition,
   t.image_url,
+  t.contact_phone,
   t.created_at,
   t.updated_at,
   c.name                        AS category_name,
@@ -183,7 +185,7 @@ LEFT JOIN reviews r ON r.tool_id = t.id
 GROUP BY
   t.id, t.owner_id, t.category_id, t.name, t.description,
   t.location, t.price_per_day, t.status, t.condition,
-  t.image_url, t.created_at, t.updated_at,
+  t.image_url, t.contact_phone, t.created_at, t.updated_at,
   c.name, u.name, u.clerk_id;
 
 -- ---------------------------------------------------------------

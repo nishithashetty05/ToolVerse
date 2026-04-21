@@ -41,6 +41,7 @@ export interface DbTool {
   status: ToolStatus;
   condition: ToolCondition;
   image_url: string | null;
+  contact_phone: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -95,6 +96,7 @@ export interface ToolResponse {
   status: ToolStatus;
   condition: ToolCondition;
   imageUrl: string | null;
+  contactPhone: string | null;
   rating: number;
   reviewCount: number;
   createdAt: string;
@@ -132,6 +134,7 @@ export interface CreateToolBody {
   pricePerDay: number;
   condition?: ToolCondition;
   imageUrl?: string;
+  contactPhone?: string;
 }
 
 export interface UpdateToolBody extends Partial<CreateToolBody> {

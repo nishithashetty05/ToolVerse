@@ -32,6 +32,7 @@ function mapTool(row: DbToolWithRating): ToolResponse {
     status: row.status,
     condition: row.condition,
     imageUrl: row.image_url,
+    contactPhone: row.contact_phone,
     rating: parseFloat(row.rating as unknown as string) || 0,
     reviewCount: parseInt(row.review_count as unknown as string) || 0,
     createdAt: row.created_at.toISOString(),
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
 //
 // Body (JSON): CreateToolBody
 //   { categoryId, name, description?, location,
-//     pricePerDay, condition?, imageUrl? }
+//     pricePerDay, condition?, imageUrl?, contactPhone? }
 // ---------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
@@ -184,8 +185,8 @@ export async function POST(request: NextRequest) {
     // Insert the new tool
     const insertResult = await query<DbToolWithRating>(
       `INSERT INTO tools
-         (owner_id, category_id, name, description, location, price_per_day, condition, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         (owner_id, category_id, name, description, location, price_per_day, condition, image_url, contact_phone)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         ownerId,
@@ -196,6 +197,7 @@ export async function POST(request: NextRequest) {
         body.pricePerDay,
         body.condition ?? 'good',
         body.imageUrl ?? null,
+        body.contactPhone ?? null,
       ]
     );
 
