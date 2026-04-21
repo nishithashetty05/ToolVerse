@@ -20,7 +20,7 @@ export default function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <header className="glass dark:glass-dark sticky top-0 z-30 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="glass dark:glass-dark h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
       <div className="flex items-center">
         <button
           onClick={onMenuClick}
