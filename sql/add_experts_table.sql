@@ -1,6 +1,5 @@
 -- =============================================================
 -- ToolVerse — Experts Table Migration
--- Run once against your Neon / PostgreSQL database
 -- =============================================================
 
 CREATE TABLE IF NOT EXISTS experts (
